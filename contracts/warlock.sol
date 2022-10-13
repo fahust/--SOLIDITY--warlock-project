@@ -26,6 +26,8 @@ contract WARLOCK is Ownable {
     string externalUrl;
     bytes32 name;
     bytes32 purchasesQuantity;
+    bytes32 currentLimit;
+    bytes32 maxLimit;
   }
 
   struct Purchase {
@@ -76,6 +78,10 @@ contract WARLOCK is Ownable {
   /// @param quantity quantité de produit que vous voulez acheter
   function buyInMarket(uint256 marketId, bytes32 quantity) external payable {
     require(msg.value >= markets[marketId].value * asciiToInteger(quantity));
+    require(
+      asciiToInteger(markets[marketId].currentLimit) + asciiToInteger(quantity) <
+        asciiToInteger(markets[marketId].maxLimit)
+    );
     Purchase memory purchase = Purchase({
       market: marketId,
       quantity: quantity,
