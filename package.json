@@ -58,7 +58,7 @@
     "@uniswap/v3-periphery": "^1.4.0",
     "chai": "^4.3.6",
     "erc721r": "^0.0.3",
-    "ethers": "^5.6.1",
+    "ethers": "^5.7.1",
     "fs": "^0.0.1-security",
     "keccak256": "^1.0.6",
     "merkletreejs": "^0.2.31",
