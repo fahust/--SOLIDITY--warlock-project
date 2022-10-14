@@ -21,7 +21,7 @@ contract WARLOCK is Ownable {
   struct Market {
     uint256 id;
     uint256 value;
-    Consumer[] consumers;
+    address[] consumers;
     string uri;
     string externalUrl;
     bytes32 name;
@@ -41,7 +41,6 @@ contract WARLOCK is Ownable {
   struct Consumer {
     uint256 totalPurchase;
     address addr;
-    Purchase[] purchases;
   }
 
   constructor() {}
@@ -63,24 +62,30 @@ contract WARLOCK is Ownable {
 
   /// @notice mettre a jour un marché au tableau des marché
   /// @param newMarket structure du marché a mêttre a jour
+  /// @param key clé du tableau de marché a supprimé
   function updateMarket(Market calldata newMarket, uint256 key) external onlyOwner {
     markets[key] = newMarket;
   }
 
   /// @notice supprimé un marché du tableau des marché
-  /// @param id clé du tableau de marché a supprimé
-  function removeMarket(uint256 id) external onlyOwner {
-    delete markets[id];
+  /// @param key clé du tableau de marché a supprimé
+  function removeMarket(uint256 key) external onlyOwner {
+    markets[key] = markets[markets.length - 1];
+    markets.pop();
   }
 
   /// @notice acheter un produit du marché
   /// @param marketId clé du marché dont vous voulez acheter le produit
   /// @param quantity quantité de produit que vous voulez acheter
   function buyInMarket(uint256 marketId, bytes32 quantity) external payable {
-    require(msg.value >= markets[marketId].value * asciiToInteger(quantity));
     require(
-      asciiToInteger(markets[marketId].currentLimit) + asciiToInteger(quantity) <
-        asciiToInteger(markets[marketId].maxLimit)
+      msg.value >= markets[marketId].value * uint256(quantity),
+      "Not enought value"
+    );
+    require(
+      uint256(markets[marketId].currentLimit) + uint256(quantity) <
+        uint256(markets[marketId].maxLimit),
+      "Max quantity reached"
     );
     Purchase memory purchase = Purchase({
       market: marketId,
@@ -90,11 +95,10 @@ contract WARLOCK is Ownable {
       status: STATUS_IN_ORDER
     });
     purchases[msg.sender][consumers[msg.sender].totalPurchase] = purchase;
-    consumers[msg.sender].purchases.push(purchase);
     consumers[msg.sender].totalPurchase++;
     if (consumers[msg.sender].addr != msg.sender) consumers[msg.sender].addr = msg.sender;
     if (existsInConsumers(msg.sender, markets[marketId].consumers) == false)
-      markets[marketId].consumers.push(consumers[msg.sender]);
+      markets[marketId].consumers.push(msg.sender);
   }
 
   ///@notice récupère tout les marché storé
@@ -120,11 +124,7 @@ contract WARLOCK is Ownable {
   ///@notice retourne un tableau de consomateur ayant acheter un produit d'un marché
   ///@param marketId addresse wallet du consomateur qui doit être retourner
   ///@return consumers retourne les consomateurs correspondant
-  function getMarketConsumers(uint256 marketId)
-    external
-    view
-    returns (Consumer[] memory)
-  {
+  function getMarketConsumers(uint256 marketId) external view returns (address[] memory) {
     return markets[marketId].consumers;
   }
 
@@ -136,30 +136,20 @@ contract WARLOCK is Ownable {
     view
     returns (Purchase[] memory)
   {
-    Purchase[] memory consumerPurcharses;
+    Purchase[] memory consumerPurcharses = new Purchase[](consumers[consumerAddress].totalPurchase);
     for (uint256 i = 0; i < consumers[consumerAddress].totalPurchase; i++) {
       consumerPurcharses[i] = purchases[consumerAddress][i];
     }
     return consumerPurcharses;
   }
 
-  function asciiToInteger(bytes32 x) public pure returns (uint256) {
-    uint256 y;
-    for (uint256 i = 0; i < 32; i++) {
-      uint256 c = (uint256(x) >> (i * 8)) & 0xff;
-      if (48 <= c && c <= 57) y += (c - 48) * 10**i;
-      else break;
-    }
-    return y;
-  }
-
-  function existsInConsumers(address addr, Consumer[] memory consumersArr)
+  function existsInConsumers(address addr, address[] memory consumersArr)
     public
     pure
     returns (bool)
   {
     for (uint256 i = 0; i < consumersArr.length; i++) {
-      if (consumersArr[i].addr == addr) {
+      if (consumersArr[i] == addr) {
         return true;
       }
     }
