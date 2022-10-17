@@ -136,7 +136,9 @@ contract WARLOCK is Ownable {
     view
     returns (Purchase[] memory)
   {
-    Purchase[] memory consumerPurcharses = new Purchase[](consumers[consumerAddress].totalPurchase);
+    Purchase[] memory consumerPurcharses = new Purchase[](
+      consumers[consumerAddress].totalPurchase
+    );
     for (uint256 i = 0; i < consumers[consumerAddress].totalPurchase; i++) {
       consumerPurcharses[i] = purchases[consumerAddress][i];
     }
@@ -144,7 +146,7 @@ contract WARLOCK is Ownable {
   }
 
   function existsInConsumers(address addr, address[] memory consumersArr)
-    public
+    internal
     pure
     returns (bool)
   {
