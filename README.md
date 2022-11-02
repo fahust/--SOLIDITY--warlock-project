@@ -33,9 +33,9 @@ The package.json file contains a set of scripts to help on the development phase
 
 # WARLOCK
 
-## STRUCTURE
-
 This contract is a marketplace contract, it allows to register different marketplaces under a specific structure
+
+## STRUCTURE
 
 ```javascript
 struct Market {
