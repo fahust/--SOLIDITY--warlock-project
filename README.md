@@ -1,6 +1,6 @@
 # Warlock smart contracts
 
-<p align="center" width="100%"><img align="center" src="./doc/Warlock.png?raw=true" /></p>
+<p align="center" width="100%"><img align="center" src="./doc/WarlockContract.png?raw=true" /></p>
 
 ## Utils
 - **truffle** 5.6.3
